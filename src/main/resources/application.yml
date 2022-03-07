@@ -1,0 +1,64 @@
+server:
+  port: 8024
+
+management:
+  security:
+    flag: false
+  server:
+    port: 8025
+  metrics:
+    prometheus:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+spring:
+  application:
+    name: '@project.name@'
+    output:
+      ansi:
+        enabled: always
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: '@db.url@'
+    username: '@db.user@'
+    password: '@db.password@'
+  flyway:
+    baseline-on-migrate: true
+    table: flyway_schema_history
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.threadPool.threadCount: 10
+      org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      org.quartz.jobStore.misfireThreshold: 60000
+      org.quartz.jobStore.dataSource: quartzDataSource
+      org.quartz.jobStore.isClustered: true
+      org.quartz.jobStore.clusterCheckinInterval: 20000
+      org.quartz.jobStore.tablePrefix: qrtz_
+  kafka:
+    bootstrap-servers: localhost:9092
+
+service:
+  proxy:
+    url: http://localhost:8022
+
+fetcher:
+  productFetchCron: '0 0 0/3 * * ?'
+  categoryFetchCron: '0 0 0/3 * * ?'
+  brandFetchCron: '0 0 0/3 * * ?'
+  streamTopicName: raw-ke-fetch-stream
