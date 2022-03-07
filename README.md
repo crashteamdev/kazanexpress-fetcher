@@ -1,1 +1,1 @@
-# kazanexpress
+# kazanexpress-fetcher
