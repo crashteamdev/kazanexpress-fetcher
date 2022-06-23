@@ -1,11 +1,11 @@
 server:
-  port: 8024
+  port: 8026
 
 management:
   security:
     flag: false
   server:
-    port: 8025
+    port: 8029
   metrics:
     prometheus:
       enabled: true

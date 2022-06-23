@@ -37,7 +37,7 @@ class ProductFetchJob : Job {
                 val productInfo = kazanExpressClient.getProductInfo(product.productId)
                 val productInfoPayload = productInfo?.get("payload") as? Map<*, *>
                     ?: throw IllegalStateException("Can't get product info")
-                val productData = productInfoPayload["data"] as? Map<*, *>
+                val productData = productInfoPayload["data"] as? Map<String, Any>
                 val productSeller = productData?.get("seller") as? Map<*, *>
                 val sellerInfo = kazanExpressClient.getShopInfo(productSeller?.get("link") as String)!!
                 var productReviewPage = jobContext.jobDetail.jobDataMap["productReviewPage"] as? Int ?: 0
@@ -67,7 +67,8 @@ class ProductFetchJob : Job {
                     .setNanos(now.nano)
                     .build()
                 // Send product fetch event
-                val productFetchData = ProductFetchData(productInfo, sellerInfo, productReviews)
+                val sellerInfoPayload = sellerInfo["payload"] as? Map<String, Any>
+                val productFetchData = ProductFetchData(productData, sellerInfoPayload!!, productReviews)
                 val productFetch = conversionService.convert(productFetchData, ProductFetch::class.java)!!
                 val fetchKazanExpressEvent = FetchKazanExpressEvent.newBuilder()
                     .setCreatedAt(nowTimestamp)

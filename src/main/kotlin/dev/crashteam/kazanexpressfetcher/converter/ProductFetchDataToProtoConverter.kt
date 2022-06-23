@@ -16,7 +16,7 @@ class ProductFetchDataToProtoConverter(
     private val objectMapper: ObjectMapper
 ) : ProtoConverter<ProductFetchData, ProductFetch> {
 
-    override fun convert(source: ProductFetchData): ProductFetch? {
+    override fun convert(source: ProductFetchData): ProductFetch {
         val productStructBuilder = Struct.newBuilder()
         val productJson = objectMapper.writeValueAsString(source.productInfo)
         JsonFormat.parser().merge(productJson, productStructBuilder)

@@ -3,7 +3,7 @@ package dev.crashteam.kazanexpressfetcher.job
 import com.google.protobuf.Timestamp
 import dev.crashteam.kazanexpressfetcher.client.KazanExpressClient
 import dev.crashteam.kazanexpressfetcher.extensions.getApplicationContext
-import dev.crashteam.kazanexpressfetcher.job.model.RootCategoriesFetchData
+import dev.crashteam.kazanexpressfetcher.job.model.CategoriesFetchData
 import dev.crashteam.kazanexpressfetcher.service.StreamService
 import dev.crashteam.kz.fetcher.CategoryFetch
 import dev.crashteam.kz.fetcher.FetchKazanExpressEvent
@@ -22,25 +22,34 @@ class CategoryFetchJob : Job {
     override fun execute(context: JobExecutionContext) {
         val applicationContext = context.getApplicationContext()
         val kazanExpressClient = applicationContext.getBean(KazanExpressClient::class.java)
-        val categories = kazanExpressClient.getRootCategoriesRaw()
-        val payload = categories?.get("payload") as? List<Map<String, Any>>
-        if (payload == null || payload.isEmpty()) {
+        val rootCategories = kazanExpressClient.getRootCategories()
+        val rootCategoriesPayload = rootCategories?.payload
+        if (rootCategoriesPayload == null || rootCategoriesPayload.isEmpty()) {
             log.warn { "Empty root categories response" }
             return
         }
         val conversionService = applicationContext.getBean(ConversionService::class.java)
-        val rootCategoriesFetchData = RootCategoriesFetchData(payload)
-        val categoryFetch = conversionService.convert(rootCategoriesFetchData, CategoryFetch::class.java)
-        val yandexDataStreamService = applicationContext.getBean(StreamService::class.java)
-        val now = Instant.now()
-        val fetchKazanExpressEvent = FetchKazanExpressEvent.newBuilder()
-            .setCreatedAt(
-                Timestamp.newBuilder()
-                .setSeconds(now.epochSecond)
-                .setNanos(now.nano)
-                .build())
-            .setCategoryFetch(categoryFetch)
-            .build()
-        yandexDataStreamService.putFetchEvent(fetchKazanExpressEvent)
+        for (rootCategory in rootCategoriesPayload) {
+            val categoryRawResponse = kazanExpressClient.getCategory(rootCategory.id)
+            val categoryRawPayload = categoryRawResponse?.get("payload") as? Map<*, *>
+            val rawCategory = categoryRawPayload?.get("category") as? Map<String, Any>
+            if (rawCategory == null) {
+                log.warn { "Empty category response with root category ${rootCategory.id}" }
+                continue
+            }
+            val categoriesFetchData = CategoriesFetchData(rawCategory)
+            val categoryFetch = conversionService.convert(categoriesFetchData, CategoryFetch::class.java)
+            val streamService = applicationContext.getBean(StreamService::class.java)
+            val now = Instant.now()
+            val fetchKazanExpressEvent = FetchKazanExpressEvent.newBuilder()
+                .setCreatedAt(
+                    Timestamp.newBuilder()
+                        .setSeconds(now.epochSecond)
+                        .setNanos(now.nano)
+                        .build())
+                .setCategoryFetch(categoryFetch)
+                .build()
+            streamService.putFetchEvent(fetchKazanExpressEvent)
+        }
     }
 }

@@ -1,7 +1,7 @@
 package dev.crashteam.kazanexpressfetcher.job.model
 
 data class ProductFetchData(
-    val productInfo: HashMap<String, Any>,
-    val sellerInfo: HashMap<String, Any>,
+    val productInfo: Map<String, Any>,
+    val sellerInfo: Map<String, Any>,
     val productReviews: MutableList<Map<*, *>>
 )

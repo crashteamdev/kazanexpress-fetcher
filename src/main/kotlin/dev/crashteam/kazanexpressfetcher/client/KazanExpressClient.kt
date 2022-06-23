@@ -101,6 +101,20 @@ class KazanExpressClient(
         return handleProxyResponse(styxResponse!!)
     }
 
+    fun getCategory(categoryId: Long, size: Int = 24, page: Int = 0): HashMap<String, Any>? {
+        val url = "${serviceProperties.proxy!!.url}/proxy?url=$ROOT_URL/category/v2/$categoryId?pageSize=$size&page=$page&sortBy=&order=ascending"
+        val headers = HttpHeaders().apply {
+            add("X-User-Agent", USER_AGENT)
+            add("X-Authorization", "Basic $AUTH_TOKEN")
+        }
+        val entity = HttpEntity<Nothing>(headers)
+        val responseType: ParameterizedTypeReference<StyxResponse<HashMap<String, Any>>> =
+            object : ParameterizedTypeReference<StyxResponse<HashMap<String, Any>>>() {}
+        val styxResponse = restTemplate.exchange(url, HttpMethod.GET, entity, responseType).body
+
+        return handleProxyResponse(styxResponse!!)
+    }
+
     fun getProductInfo(productId: Long): HashMap<String, Any>? {
         val url = "${serviceProperties.proxy!!.url}/proxy?url=$ROOT_URL/v2/product/$productId"
         val headers = HttpHeaders().apply {
