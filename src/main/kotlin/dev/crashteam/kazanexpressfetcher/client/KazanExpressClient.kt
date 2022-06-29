@@ -102,7 +102,13 @@ class KazanExpressClient(
     }
 
     fun getCategory(categoryId: Long, size: Int = 24, page: Int = 0): HashMap<String, Any>? {
-        val url = "${serviceProperties.proxy!!.url}/proxy?url=$ROOT_URL/category/v2/$categoryId?pageSize=$size&page=$page&sortBy=&order=ascending"
+        val queryParams = mapOf<String, Any>(
+            "pageSize" to size,
+            "page" to page,
+            "sortBy" to "&order=ascending",
+        ).map { it.key + "=" + URLEncoder.encode(it.value.toString(), StandardCharsets.UTF_8) }
+            .joinToString(URLEncoder.encode("&", StandardCharsets.UTF_8))
+        val url = "${serviceProperties.proxy!!.url}/proxy?url=$ROOT_URL/category/v2/$categoryId?$queryParams"
         val headers = HttpHeaders().apply {
             add("X-User-Agent", USER_AGENT)
             add("X-Authorization", "Basic $AUTH_TOKEN")
@@ -176,8 +182,13 @@ class KazanExpressClient(
     }
 
     fun getCategoryBrands(categoryId: Long): HashMap<String, Any>? {
+        val queryParams = mapOf<String, Any>(
+            "categoryId" to categoryId,
+            "showAdult" to "true"
+        ).map { it.key + "=" + URLEncoder.encode(it.value.toString(), StandardCharsets.UTF_8) }
+            .joinToString(URLEncoder.encode("&", StandardCharsets.UTF_8))
         val url = "${serviceProperties.proxy!!.url}/proxy?url=" +
-                "$ROOT_URL/v2/main/search/filter?&categoryId=$categoryId&showAdult=true"
+                "$ROOT_URL/v2/main/search/filter?$queryParams"
         val headers = HttpHeaders().apply {
             add("X-User-Agent", USER_AGENT)
             add("X-Authorization", "Basic $AUTH_TOKEN")
@@ -192,8 +203,14 @@ class KazanExpressClient(
     }
 
     fun getProductsByBrand(brandId: Long, size: Int = 24, page: Int = 0): Map<String, Any>? {
+        val queryParams = mapOf<String, Any>(
+            "filter" to "1187:$brandId",
+            "size" to size,
+            "page" to page,
+        ).map { it.key + "=" + URLEncoder.encode(it.value.toString(), StandardCharsets.UTF_8) }
+            .joinToString(URLEncoder.encode("&", StandardCharsets.UTF_8))
         val url = "${serviceProperties.proxy!!.url}/proxy?url=" +
-                "$ROOT_URL/v2/main/search/product?filter=1187:$brandId&size=$size&page=$page"
+                "$ROOT_URL/v2/main/search/product?$queryParams"
         val headers = HttpHeaders().apply {
             add("X-User-Agent", USER_AGENT)
             add("X-Authorization", "Basic $AUTH_TOKEN")

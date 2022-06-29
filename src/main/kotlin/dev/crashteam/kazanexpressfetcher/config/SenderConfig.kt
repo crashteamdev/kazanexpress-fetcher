@@ -23,6 +23,9 @@ class SenderConfig {
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = ByteArraySerializer::class.java
         props[ProducerConfig.BATCH_SIZE_CONFIG] = 50
+        props[ProducerConfig.ACKS_CONFIG] = "1"
+//        props[ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION] = 1
+//        props[ProducerConfig.RETRIES_CONFIG] = 3
         return props
     }
 

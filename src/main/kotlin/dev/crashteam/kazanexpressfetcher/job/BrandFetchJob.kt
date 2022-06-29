@@ -33,8 +33,11 @@ class BrandFetchJob : Job {
                 ?: throw IllegalStateException("Can't category brands")
             val categoryBrandResponsePayload = categoryBrandResponse["payload"] as? Map<*, *>
             val categoryBrandResponseFilters = categoryBrandResponsePayload?.get("filters") as? List<Map<*, *>>
+
+            if (categoryBrandResponseFilters == null || categoryBrandResponseFilters.size <= 2) continue
+
             val brands = categoryBrandResponseFilters?.get(2)?.get("values") as? List<Map<*, *>>
-            val brandFetchEvents = brands?.map { brand ->
+            brands?.forEach { brand ->
                 var brandProductsPage = 0
                 val productIds = mutableListOf<Long>()
                 while (true) {
@@ -51,7 +54,7 @@ class BrandFetchJob : Job {
                 val brandFetchData = BrandFetchData(brand, categoryId, productIds)
                 val brandFetch = conversionService.convert(brandFetchData, BrandFetch::class.java)!!
                 val now = Instant.now()
-                FetchKazanExpressEvent.newBuilder()
+                val fetchKazanExpressEvent = FetchKazanExpressEvent.newBuilder()
                     .setCreatedAt(
                         Timestamp.newBuilder()
                             .setSeconds(now.epochSecond)
@@ -60,9 +63,8 @@ class BrandFetchJob : Job {
                     )
                     .setBrandFetch(brandFetch)
                     .build()
+                streamService.putFetchEvent(fetchKazanExpressEvent)
             }!!
-            streamService.putFetchEvents(brandFetchEvents)
         }
     }
-
 }

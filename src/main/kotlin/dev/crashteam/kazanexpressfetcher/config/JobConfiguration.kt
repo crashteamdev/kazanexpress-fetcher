@@ -44,7 +44,7 @@ class JobConfiguration(
 
     private fun triggerBrandFetch(): CronTrigger {
         return TriggerBuilder.newTrigger()
-            .forJob(categoryFetchJob())
+            .forJob(brandFetchJob())
             .withIdentity(BRAND_FETCH_JOB, BRAND_FETCH_GROUP)
             .withSchedule(CronScheduleBuilder.cronSchedule(fetcherProperties.brandFetchCron))
             .build()
