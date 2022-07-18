@@ -61,4 +61,5 @@ fetcher:
   productFetchCron: '0 0 0/3 * * ?'
   categoryFetchCron: '0 0 0/3 * * ?'
   brandFetchCron: '0 0 0/3 * * ?'
+  productPositionFetchCron: '0/30 * * * * ?'
   streamTopicName: raw-ke-fetch-stream

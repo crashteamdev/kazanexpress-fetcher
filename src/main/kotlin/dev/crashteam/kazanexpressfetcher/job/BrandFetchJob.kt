@@ -27,7 +27,11 @@ class BrandFetchJob : Job {
         val streamService = applicationContext.getBean(StreamService::class.java)
         val rootCategories = kazanExpressClient.getRootCategories()
             ?: throw IllegalStateException("Can't get root categories")
-        val categoryIds = rootCategories.payload.flatMap { CategoryIdExtractor.extractCategoryIds(it) }
+        var categoryIds = rootCategories.payload.flatMap { CategoryIdExtractor.extractCategoryIds(it) }
+        val fetchedCategoryIds = context.jobDetail.jobDataMap["fetchedCategoryIds"] as? MutableList<Long>
+        if (fetchedCategoryIds != null) {
+            categoryIds = categoryIds.filter { !fetchedCategoryIds.contains(it) }
+        }
         for (categoryId in categoryIds) {
             val categoryBrandResponse = kazanExpressClient.getCategoryBrands(categoryId)
                 ?: throw IllegalStateException("Can't category brands")
@@ -65,6 +69,10 @@ class BrandFetchJob : Job {
                     .build()
                 streamService.putFetchEvent(fetchKazanExpressEvent)
             }!!
+            val newFetchedCategoryIds =
+                context.jobDetail.jobDataMap["fetchedCategoryIds"] as? MutableList<Long> ?: mutableListOf()
+            newFetchedCategoryIds.add(categoryId)
+            context.jobDetail.jobDataMap["fetchedCategoryIds"] = newFetchedCategoryIds
         }
     }
 }

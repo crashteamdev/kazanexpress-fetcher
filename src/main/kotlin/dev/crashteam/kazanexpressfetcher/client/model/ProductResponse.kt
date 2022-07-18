@@ -1,15 +1,38 @@
 package dev.crashteam.kazanexpressfetcher.client.model
 
-import java.math.BigDecimal
-
 data class ProductResponse(
-    val payload: ProductDataWrapper?,
+    val payload: ProductPayload
 )
 
-data class ProductDataWrapper(
-    val data: ProductData,
+data class ProductPayload(
+    val data: ProductData
 )
 
 data class ProductData(
-    val map: Map<String, Any>,
+    val id: Long,
+    val characteristics: List<ProductCharacteristic>,
+    val skuList: List<ProductSku>
+)
+
+data class ProductCharacteristic(
+    val id: Int,
+    val title: String,
+    val values: List<ProductCharacteristicValue>
+)
+
+data class ProductCharacteristicValue(
+    val id: Int,
+    val title: String,
+    val value: String
+)
+
+data class ProductSku(
+    val id: Long,
+    val availableAmount: Int,
+    val characteristics: List<ProductSkuCharacteristic>
+)
+
+data class ProductSkuCharacteristic(
+    val charIndex: Short,
+    val valueIndex: Short
 )
