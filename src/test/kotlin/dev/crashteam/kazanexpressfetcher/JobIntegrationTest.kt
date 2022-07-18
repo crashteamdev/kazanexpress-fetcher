@@ -170,7 +170,7 @@ class JobIntegrationTest : AbstractIntegrationTest() {
         brandFetchJob.execute(jobExecutionContext)
 
         // Then
-        verify(streamService, atLeast(1)).putFetchEvents(org.mockito.kotlin.any())
+        verify(streamService, atLeast(1)).putFetchEvent(org.mockito.kotlin.any())
     }
 
 }
