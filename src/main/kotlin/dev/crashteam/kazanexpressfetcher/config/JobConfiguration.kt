@@ -3,6 +3,7 @@ package dev.crashteam.kazanexpressfetcher.config
 import dev.crashteam.kazanexpressfetcher.config.properties.FetcherProperties
 import dev.crashteam.kazanexpressfetcher.job.BrandFetchJob
 import dev.crashteam.kazanexpressfetcher.job.CategoryFetchJob
+import dev.crashteam.kazanexpressfetcher.job.PositionProductFetchMasterJob
 import dev.crashteam.kazanexpressfetcher.job.ProductFetcherMasterJob
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
@@ -21,7 +22,13 @@ class JobConfiguration(
     @PostConstruct
     fun init() {
         schedulerFactoryBean.addJob(categoryProductMasterJob(), true, true)
-        if (!schedulerFactoryBean.checkExists(TriggerKey(PRODUCT_FETCHER_MASTER_JOB, CATEGORY_PRODUCT_FETCHER_MASTER_JOB_GROUP))) {
+        if (!schedulerFactoryBean.checkExists(
+                TriggerKey(
+                    PRODUCT_FETCHER_MASTER_JOB,
+                    CATEGORY_PRODUCT_FETCHER_MASTER_JOB_GROUP
+                )
+            )
+        ) {
             schedulerFactoryBean.scheduleJob(triggerGroupProductMasterJob())
         }
         schedulerFactoryBean.addJob(categoryFetchJob(), true, true)
@@ -31,6 +38,16 @@ class JobConfiguration(
         schedulerFactoryBean.addJob(brandFetchJob(), true, true)
         if (!schedulerFactoryBean.checkExists(TriggerKey(BRAND_FETCH_JOB, BRAND_FETCH_GROUP))) {
             schedulerFactoryBean.scheduleJob(triggerBrandFetch())
+        }
+        schedulerFactoryBean.addJob(productPositionMasterFetchJob(), true, true)
+        if (!schedulerFactoryBean.checkExists(
+                TriggerKey(
+                    PRODUCT_POSITION_MASTER_FETCH_JOB,
+                    PRODUCT_POSITION_MASTER_FETCH_GROUP
+                )
+            )
+        ) {
+            schedulerFactoryBean.scheduleJob(triggerProductPositionMasterFetch())
         }
     }
 
@@ -44,7 +61,7 @@ class JobConfiguration(
 
     private fun triggerBrandFetch(): CronTrigger {
         return TriggerBuilder.newTrigger()
-            .forJob(categoryFetchJob())
+            .forJob(brandFetchJob())
             .withIdentity(BRAND_FETCH_JOB, BRAND_FETCH_GROUP)
             .withSchedule(CronScheduleBuilder.cronSchedule(fetcherProperties.brandFetchCron))
             .build()
@@ -82,6 +99,22 @@ class JobConfiguration(
             .build()
     }
 
+    private fun productPositionMasterFetchJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(PRODUCT_POSITION_MASTER_FETCH_JOB, PRODUCT_POSITION_MASTER_FETCH_GROUP)
+        jobDetail.jobClass = PositionProductFetchMasterJob::class.java
+
+        return jobDetail
+    }
+
+    private fun triggerProductPositionMasterFetch(): CronTrigger {
+        return TriggerBuilder.newTrigger()
+            .forJob(productPositionMasterFetchJob())
+            .withIdentity(PRODUCT_POSITION_MASTER_FETCH_JOB, PRODUCT_POSITION_MASTER_FETCH_GROUP)
+            .withSchedule(CronScheduleBuilder.cronSchedule(fetcherProperties.productPositionFetchCron))
+            .build()
+    }
+
     companion object {
         const val PRODUCT_FETCHER_MASTER_JOB = "productFetcherMasterJob"
         const val CATEGORY_PRODUCT_FETCHER_MASTER_JOB_GROUP = "categoryProductMasterJobGroup"
@@ -89,5 +122,7 @@ class JobConfiguration(
         const val CATEGORY_FETCH_GROUP = "categoryFetchGroup"
         const val BRAND_FETCH_JOB = "brandFetchJob"
         const val BRAND_FETCH_GROUP = "brandFetchGroup"
+        const val PRODUCT_POSITION_MASTER_FETCH_JOB = "productPositionMasterJob"
+        const val PRODUCT_POSITION_MASTER_FETCH_GROUP = "productPositionMasterJobGroup"
     }
 }

@@ -94,7 +94,7 @@ class JobIntegrationTest : AbstractIntegrationTest() {
         `when`(kazanExpressClient.getCategoryProducts(anyLong(), anyInt(), anyInt()))
             .thenReturn(mockCategoryResponse)
             .thenReturn(CategoryResponse(null, null))
-        `when`(kazanExpressClient.getProductInfo(anyLong())).thenReturn(productResponseMap)
+        `when`(kazanExpressClient.getProductInfoRaw(anyLong())).thenReturn(productResponseMap)
         `when`(kazanExpressClient.getShopInfo(anyString()))
             .thenReturn(
                 objectMapper.readValue(mockShopResponse, responseType)
@@ -170,7 +170,7 @@ class JobIntegrationTest : AbstractIntegrationTest() {
         brandFetchJob.execute(jobExecutionContext)
 
         // Then
-        verify(streamService, atLeast(1)).putFetchEvents(org.mockito.kotlin.any())
+        verify(streamService, atLeast(1)).putFetchEvent(org.mockito.kotlin.any())
     }
 
 }

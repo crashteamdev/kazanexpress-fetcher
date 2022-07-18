@@ -23,7 +23,7 @@ class ProductFetchJob : Job {
         val kazanExpressClient = appContext.getBean(KazanExpressClient::class.java)
         val conversionService = appContext.getBean(ConversionService::class.java)
         val streamService = appContext.getBean(StreamService::class.java)
-        val categoryId = jobContext.jobDetail.jobDataMap[ProductFetcherMasterJob.JOB_CATEGORY_ID] as? Long
+        val categoryId = jobContext.jobDetail.jobDataMap[PositionProductFetchMasterJob.JOB_CATEGORY_ID] as? Long
             ?: throw IllegalStateException("categoryId can't be null")
         var productCategoryPage = jobContext.jobDetail.jobDataMap["productCategoryPage"] as? Int ?: 0
         while (true) {
@@ -34,7 +34,7 @@ class ProductFetchJob : Job {
             }
             val fetchEventList = mutableListOf<FetchKazanExpressEvent>()
             categoryResponse.payload.products.forEachIndexed { index, product ->
-                val productInfo = kazanExpressClient.getProductInfo(product.productId)
+                val productInfo = kazanExpressClient.getProductInfoRaw(product.productId)
                 val productInfoPayload = productInfo?.get("payload") as? Map<*, *>
                     ?: throw IllegalStateException("Can't get product info")
                 val productData = productInfoPayload["data"] as? Map<String, Any>

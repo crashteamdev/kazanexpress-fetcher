@@ -17,4 +17,6 @@ data class FetcherProperties(
     val brandFetchCron: String? = null,
     @field:NotEmpty
     val streamTopicName: String? = null,
+    @field:NotEmpty
+    val productPositionFetchCron: String? = null,
 )
