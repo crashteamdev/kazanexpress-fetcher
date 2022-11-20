@@ -23,7 +23,7 @@
         <db.user>postgres</db.user>
         <db.password>postgres</db.password>
         <protobuf.version>3.19.4</protobuf.version>
-        <testcontainer.version>1.16.3</testcontainer.version>
+        <testcontainer.version>1.17.6</testcontainer.version>
     </properties>
     <dependencies>
         <!-- Spring -->
